@@ -80,75 +80,33 @@
             
             $values[$id] = $id_val;
 
-            $req = $db->prepare($sql);
+            $req = $this->db->prepare($sql);
             if ($req->execute($values)) {
                 $result = array("status"=>1,
-                                "message"=> "Enregistrement modifier avec succès");
+                                "message"=> "Enregistrement modifié avec succès");
             } else {
                 $result = array("status"=>0,
-                                "message"=> "modification échouer");
+                                "message"=> "modification échouée");
             }
 
-            header('Content-Type: application/json');
-            echo json_encode($result);
+            return json_encode($result);
             
         }
     }
 
+        function delete($table, $id, $id_val)
+        {
+            $sql = "DELETE FROM $table WHERE $id=$id_val";
 
-        
-    }
-    
-
-    $request_method = $_SERVER['REQUEST_METHOD'];
-
-    switch ($request_method) {
-        case 'GET':
-            if(!empty($_GET['id'])){
-                $id = intval($_GET['id']);
-                get_employees($id);
-            }else{
-                get_employees();
+            if ($this->db->exec($sql)) {
+                $result = array("status"=>1,
+                                "message"=> "Enregistrement supprimer avec succès");
+            } else {
+                $result = array("status"=>0,
+                                "message"=> "suppression échouée");
             }
-            break;
-        
-        case 'POST':
-            $data = json_decode(file_get_contents('php://input'),true);
-            insert('vols',['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'],$data);
-            break;
 
-        case 'PUT':
-            $id = intval($_GET['id']);
-            $data = json_decode(file_get_contents('php://input'),true);
-            update('vols',['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'],$data, 'id', $id);
-            break;
-        case 'DELETE':
-            $id = intval($_GET['id']);
-            delete('vols', 'id', $id);
-            break;
-        
-        default:
-            header('HTTP/1.0 405 Method Not Allowed');
-            break;
-    }
-
-
-
-
-
-    function delete($table, $id, $id_val)
-    {
-        global $db;
-        $sql = "DELETE FROM $table WHERE $id=$id_val";
-
-        if ($db->exec($sql)) {
-            $result = array("status"=>1,
-                            "message"=> "Enregistrement supprimer avec succès");
-        } else {
-            $result = array("status"=>0,
-                            "message"=> "suppression échouer");
+            return json_encode($result);
         }
-
-        header('Content-Type: application/json');
-        echo json_encode($result);
+        
     }
