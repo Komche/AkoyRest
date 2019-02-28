@@ -2,23 +2,39 @@
     header('Content-Type: application/json');
 
     include_once('../config/connexion.php');
+    include_once('../model/table.php');
 
     $database = new Connexion();
     $db = $database->getConnection();
 
+    if (!empty($_GET['id'])) {
+        $id = $_GET['id'];
+       // die($id);
+    } else {
+        $id=null;
+    }
+    
+
     $data = json_decode(file_get_contents('php://input'),true);
-    $table = new Table($db);
+    
+    $table_name = explode("/", $_SERVER['REDIRECT_URL']); 
+    if (in_array($table_name[3], $database->tables)) {
+        $table = new Table($db,$table_name[3],null,null,'id',$id);
+    } else {
+        die("$table_name[3] n'existe pas dans la liste des tables de cette base de donnée ");
+    }
+    
+    
     
 
     $request_method = $_SERVER['REQUEST_METHOD'];
 
     switch ($request_method) {
         case 'GET':
-            if(!empty($_GET['id'])){
-                $id = intval($_GET['id']);
-                get_employees($id);
+            if(!empty($id)){
+                echo $table->getData();
             }else{
-                get_employees();
+                echo $table->getData();
             }
             break;
         

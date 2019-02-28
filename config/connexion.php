@@ -6,6 +6,7 @@
         private $username = "root";
         private $password = "";
         public $conn;
+        public $tables = ['vols', 'products', 'categories'];
 
         public function getConnection()
         {

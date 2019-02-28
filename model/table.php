@@ -8,7 +8,7 @@
         private $id_val;
         private $db;
 
-        public function __construct($db, $table, $fields = [], $values = [], $id=null, $id_val=null) {
+        public function __construct($db, $table, $fields = [null], $values = [null], $id=null, $id_val=null) {
             $this->db = $db;
             $this->table = $table;
             $this->fields = $fields;
@@ -21,11 +21,17 @@
         {
             $query = "SELECT * FROM $this->table ";
             if ($this->id!=null && $this->id_val!=null) {
+                //die($this->id_val);
                 $query .= "WHERE $this->id=:$this->id LIMIT 1";
 
                 $req = $this->db->prepare($query);
-                $req->execute(['id'=>$this->id]);
+                //var_dump([$this->id=>intval($this->id_val)]); die();
+                $req->execute([$this->id=>intval($this->id_val)]);
                 if ($result = $req->fetch(PDO::FETCH_ASSOC)) {
+                    return json_encode($result);
+                }else {
+                    $result = array("status"=>0,
+                                    "message"=> "Une erreur s'est produite ou enregistrement non trouvé");
                     return json_encode($result);
                 }
             }else{
