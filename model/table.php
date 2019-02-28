@@ -5,6 +5,46 @@
     $database = new Connexion();
     $db = $database->getConnection();
 
+    class Table {
+
+        private $table;
+        private $fields = [];
+        private $values = [];
+        private $id;
+        private $db;
+
+        public function __construct($db) {
+            $this->db = $db;
+        }
+
+        public function getData($table, $id=null, $id_val=null)
+        {
+            $query = "SELECT * FROM $table ";
+            if ($id!=null && $id_val!=null) {
+                $query .= "WHERE $id=:$id LIMIT 1";
+
+                $req = $this->db->prepare($query);
+                $req->execute(['id'=>$id]);
+                if ($result = $req->fetch(PDO::FETCH_ASSOC)) {
+                    header('Content-Type: application/json');
+                    return json_encode($result);
+                }
+            }else{
+                $req = $this->db->query($query);
+                if ($result = $req->fetchAll(PDO::FETCH_ASSOC)) {
+                    header('Content-Type: application/json');
+                    return json_encode($result);
+                }
+            }       
+            
+            
+        }
+
+
+        
+    }
+    
+
     $request_method = $_SERVER['REQUEST_METHOD'];
 
     switch ($request_method) {
@@ -37,28 +77,6 @@
             break;
     }
 
-    function get_employees($id=null)
-    {
-        global $db;
-        $query = "SELECT * FROM vols ";
-        if ($id!=null) {
-            $query .= "WHERE id=:id LIMIT 1";
-            $req = $db->prepare($query);
-            $req->execute(['id'=>$id]);
-            if ($result = $req->fetch(PDO::FETCH_ASSOC)) {
-                header('Content-Type: application/json');
-                echo json_encode($result);
-            }
-        }else{
-            $req = $db->query($query);
-            if ($result = $req->fetchAll(PDO::FETCH_ASSOC)) {
-                header('Content-Type: application/json');
-                echo json_encode($result);
-            }
-        }       
-        
-        
-    }
 
     function insert($table, $fields = [], $values = [])
     {
