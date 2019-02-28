@@ -5,20 +5,26 @@
         private $fields = [];
         private $values = [];
         private $id;
+        private $id_val;
         private $db;
 
-        public function __construct($db) {
+        public function __construct($db, $table, $fields = [], $values = [], $id=null, $id_val=null) {
             $this->db = $db;
+            $this->table = $table;
+            $this->fields = $fields;
+            $this->values = $values;
+            $this->id = $id;
+            $this->id_val = $id_val;            
         }
 
-        public function getData($table, $id=null, $id_val=null)
+        public function getData()
         {
-            $query = "SELECT * FROM $table ";
-            if ($id!=null && $id_val!=null) {
-                $query .= "WHERE $id=:$id LIMIT 1";
+            $query = "SELECT * FROM $this->table ";
+            if ($this->id!=null && $this->id_val!=null) {
+                $query .= "WHERE $this->id=:$this->id LIMIT 1";
 
                 $req = $this->db->prepare($query);
-                $req->execute(['id'=>$id]);
+                $req->execute(['id'=>$this->id]);
                 if ($result = $req->fetch(PDO::FETCH_ASSOC)) {
                     return json_encode($result);
                 }
@@ -30,12 +36,12 @@
             }                              
         }
 
-    function insert($table, $fields = [], $values = [])
+    function insert()
     {
-        if (count($fields) > 0) {
-            $total = count($fields) - 1;
-            $sql = "INSERT INTO $table(";
-            foreach ($fields as $key => $field) {
+        if (count($this->fields) > 0) {
+            $total = count($this->fields) - 1;
+            $sql = "INSERT INTO $this->table(";
+            foreach ($this->fields as $key => $field) {
                 if ($total != $key) {
                     $sql .= $field . ", ";
                 } else {
@@ -43,7 +49,7 @@
                 }
             }
             $sql .= "VALUES(";
-            foreach ($fields as $key => $field) {
+            foreach ($this->fields as $key => $field) {
                 if ($total != $key) {
                     $sql .= ":$field, ";
                 } else {
@@ -64,24 +70,24 @@
         }
     }
 
-    function update($table, $fields = [], $values = [], $id, $id_val)
+    function update()
     {
-        if (count($fields) > 0) {
-            $total = count($fields) - 1;
+        if (count($this->fields) > 0) {
+            $total = count($this->fields) - 1;
             $sql = "UPDATE $table SET ";
-            foreach ($fields as $key => $field) {
+            foreach ($this->fields as $key => $field) {
                 if ($total != $key) {
                     $sql .= "$field=:$field, ";
                 } else {
                     $sql .= "$field=:$field ";
                 }
             }
-            $sql .= "WHERE $id=:$id";
+            $sql .= "WHERE $this->id=:$this->id";
             
-            $values[$id] = $id_val;
+            $values[$this->id] = $this->id_val;
 
             $req = $this->db->prepare($sql);
-            if ($req->execute($values)) {
+            if ($req->execute($this->values)) {
                 $result = array("status"=>1,
                                 "message"=> "Enregistrement modifié avec succès");
             } else {
@@ -94,9 +100,9 @@
         }
     }
 
-        function delete($table, $id, $id_val)
+        function delete()
         {
-            $sql = "DELETE FROM $table WHERE $id=$id_val";
+            $sql = "DELETE FROM $table WHERE $this->id=$this->id_val";
 
             if ($this->db->exec($sql)) {
                 $result = array("status"=>1,
