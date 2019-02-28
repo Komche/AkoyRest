@@ -7,7 +7,7 @@
     $db = $database->getConnection();
 
     $data = json_decode(file_get_contents('php://input'),true);
-
+    $table = new Table($db);
     
 
     $request_method = $_SERVER['REQUEST_METHOD'];
