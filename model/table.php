@@ -1,10 +1,4 @@
 <?php
-
-    include_once('../config/connexion.php');
-
-    $database = new Connexion();
-    $db = $database->getConnection();
-
     class Table {
 
         private $table;
@@ -26,19 +20,80 @@
                 $req = $this->db->prepare($query);
                 $req->execute(['id'=>$id]);
                 if ($result = $req->fetch(PDO::FETCH_ASSOC)) {
-                    header('Content-Type: application/json');
                     return json_encode($result);
                 }
             }else{
                 $req = $this->db->query($query);
                 if ($result = $req->fetchAll(PDO::FETCH_ASSOC)) {
-                    header('Content-Type: application/json');
                     return json_encode($result);
                 }
-            }       
-            
+            }                              
+        }
+
+    function insert($table, $fields = [], $values = [])
+    {
+        if (count($fields) > 0) {
+            $total = count($fields) - 1;
+            $sql = "INSERT INTO $table(";
+            foreach ($fields as $key => $field) {
+                if ($total != $key) {
+                    $sql .= $field . ", ";
+                } else {
+                    $sql .= $field . ") ";
+                }
+            }
+            $sql .= "VALUES(";
+            foreach ($fields as $key => $field) {
+                if ($total != $key) {
+                    $sql .= ":$field, ";
+                } else {
+                    $sql .= ":$field)";
+                }
+            }
+
+            $req = $this->db->prepare($sql);
+            if ($req->execute($values)) {
+                $result = array("status"=>1,
+                                "message"=> "Enregistrement effectué avec succès");
+            } else {
+                $result = array("status"=>0,
+                                "message"=> "Enregistrement échoué");
+            }
+            return json_encode($result);
             
         }
+    }
+
+    function update($table, $fields = [], $values = [], $id, $id_val)
+    {
+        if (count($fields) > 0) {
+            $total = count($fields) - 1;
+            $sql = "UPDATE $table SET ";
+            foreach ($fields as $key => $field) {
+                if ($total != $key) {
+                    $sql .= "$field=:$field, ";
+                } else {
+                    $sql .= "$field=:$field ";
+                }
+            }
+            $sql .= "WHERE $id=:$id";
+            
+            $values[$id] = $id_val;
+
+            $req = $db->prepare($sql);
+            if ($req->execute($values)) {
+                $result = array("status"=>1,
+                                "message"=> "Enregistrement modifier avec succès");
+            } else {
+                $result = array("status"=>0,
+                                "message"=> "modification échouer");
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode($result);
+            
+        }
+    }
 
 
         
@@ -78,75 +133,8 @@
     }
 
 
-    function insert($table, $fields = [], $values = [])
-    {
-        global $db;
-        if (count($fields) > 0) {
-            $total = count($fields) - 1;
-            $sql = "INSERT INTO $table(";
-            foreach ($fields as $key => $field) {
-                if ($total != $key) {
-                    $sql .= $field . ", ";
-                } else {
-                    $sql .= $field . ") ";
-                }
-            }
-            $sql .= "VALUES(";
-            foreach ($fields as $key => $field) {
-                if ($total != $key) {
-                    $sql .= ":$field, ";
-                } else {
-                    $sql .= ":$field)";
-                }
-            }
 
-            $req = $db->prepare($sql);
-            if ($req->execute($values)) {
-                $result = array("status"=>1,
-                                "message"=> "Enregistrement ajouté avec succès");
-            } else {
-                $result = array("status"=>0,
-                                "message"=> "Enregistrement échouer");
-            }
 
-            header('Content-Type: application/json');
-            echo json_encode($result);
-            
-        }
-    }
-
-    function update($table, $fields = [], $values = [], $id, $id_val)
-    {
-        global $db;
-        if (count($fields) > 0) {
-            $total = count($fields) - 1;
-            $sql = "UPDATE $table SET ";
-            foreach ($fields as $key => $field) {
-                if ($total != $key) {
-                    $sql .= "$field=:$field, ";
-                } else {
-                    $sql .= "$field=:$field ";
-                }
-            }
-            $sql .= "WHERE $id=:$id";
-            
-            $values[$id] = $id_val;
-            //echo($sql); print_r($values); die();
-
-            $req = $db->prepare($sql);
-            if ($req->execute($values)) {
-                $result = array("status"=>1,
-                                "message"=> "Enregistrement modifier avec succès");
-            } else {
-                $result = array("status"=>0,
-                                "message"=> "modification échouer");
-            }
-
-            header('Content-Type: application/json');
-            echo json_encode($result);
-            
-        }
-    }
 
     function delete($table, $id, $id_val)
     {
