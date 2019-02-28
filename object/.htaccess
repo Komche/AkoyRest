@@ -1,0 +1,4 @@
+RewriteEngine On #Turn on the rewrite engine
+
+RewriteRule [a-zA-Z]/?$ table.php [NC,L]
+RewriteRule [a-zA-Z]/([^/\.]+)/?$ table.php?id=$1 [NC,L]
