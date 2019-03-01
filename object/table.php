@@ -6,6 +6,8 @@
 
     $database = new Connexion();
     $db = $database->getConnection();
+    $config = $database->getConfig();
+
     if (!empty($_GET['id'])) {
         $id = $_GET['id'];
        // die($id);
@@ -17,7 +19,7 @@
     $data = json_decode(file_get_contents('php://input'),true);
     
     $table_name = explode("/", $_SERVER['REDIRECT_URL']); 
-    if (in_array($table_name[3], $database->config['tables'])) {
+    if (in_array($table_name[3], $config['tables'])) {
         $table = new Table($db,$table_name[3],null,null,'id',$id);
     } else {
         die("$table_name[3] n'existe pas dans la liste des tables de cette base de donnée ");
@@ -39,6 +41,7 @@
         
         case 'POST':
             insert('vols',['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'],$data);
+            echo $table->insert();
             break;
 
         case 'PUT':
