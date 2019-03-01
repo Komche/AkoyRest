@@ -6,7 +6,6 @@
 
     $database = new Connexion();
     $db = $database->getConnection();
-
     if (!empty($_GET['id'])) {
         $id = $_GET['id'];
        // die($id);
@@ -18,7 +17,7 @@
     $data = json_decode(file_get_contents('php://input'),true);
     
     $table_name = explode("/", $_SERVER['REDIRECT_URL']); 
-    if (in_array($table_name[3], $database->tables)) {
+    if (in_array($table_name[3], $database->config['tables'])) {
         $table = new Table($db,$table_name[3],null,null,'id',$id);
     } else {
         die("$table_name[3] n'existe pas dans la liste des tables de cette base de donnée ");
