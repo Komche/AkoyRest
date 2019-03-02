@@ -93,7 +93,7 @@
             $sql .= "WHERE $this->id=:$this->id";
             
             $this->values[$this->id] = $this->id_val;
-            
+
             $req = $this->db->prepare($sql);
             if ($req->execute($this->values)) {
                 $result = array("status"=>1,
@@ -108,9 +108,9 @@
         }
     }
 
-        function delete()
+        public function delete()
         {
-            $sql = "DELETE FROM $table WHERE $this->id=$this->id_val";
+            $sql = "DELETE FROM $this->table WHERE $this->id=$this->id_val";
 
             if ($this->db->exec($sql)) {
                 $result = array("status"=>1,

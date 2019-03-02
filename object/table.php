@@ -59,7 +59,7 @@
             break;
         case 'DELETE':
             $id = intval($_GET['id']);
-            delete('vols', 'id', $id);
+            echo $table->delete();
             break;
         
         default:
