@@ -9,10 +9,10 @@
     $config = $database->getConfig();
 
     if (!empty($_GET['id'])) {
-        $id = $_GET['id'];
+        $id_val = $_GET['id'];
        // die($id);
     } else {
-        $id=null;
+        $id_val=null;
     }
     
 
@@ -20,7 +20,17 @@
     
     $table_name = explode("/", $_SERVER['REDIRECT_URL']); 
     if (in_array($table_name[3], $config['tables'])) {
-        $table = new Table($db,$table_name[3],null,null,'id',$id);
+
+        $current_table = $table_name[3];
+        $id = $config['tables'][$current_table]['id'][0];
+        $table_field = array();
+        $table_field_ = $config['tables'][$current_table];
+        foreach ($table_field_ as $key => $value) {
+            if (is_int($key)) {
+                $table_field[] = $value;
+            }
+        }
+        $table = new Table($db,$table_name[3],$table_field,$data,$id,$id_val);
     } else {
         die("$table_name[3] n'existe pas dans la liste des tables de cette base de donnée ");
     }
@@ -40,7 +50,7 @@
             break;
         
         case 'POST':
-            insert('vols',['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'],$data);
+            //insert('vols',['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'],$data);
             echo $table->insert();
             break;
 

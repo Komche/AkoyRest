@@ -13,6 +13,9 @@
             $this->config['tables']['vols'] = ['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'];
             $this->config['tables']['products'] = ['name', 'description', 'price', 'category_id'];
             $this->config['tables']['categories'] = ['name', 'description'];
+            $this->config['tables']['vols']['id'] = ['id'];
+            $this->config['tables']['products']['id'] = ['id'];
+            $this->config['tables']['categories']['id'] = ['id'];
         }
 
         //$mydatabase['name'] = "api_db";

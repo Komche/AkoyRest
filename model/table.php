@@ -63,8 +63,10 @@
                 }
             }
 
+            
+
             $req = $this->db->prepare($sql);
-            if ($req->execute($values)) {
+            if ($req->execute($this->values)) {
                 $result = array("status"=>1,
                                 "message"=> "Enregistrement effectué avec succès");
             } else {
