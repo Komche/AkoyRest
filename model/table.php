@@ -31,8 +31,10 @@
                 //var_dump([$this->id=>intval($this->id_val)]); die();
                 $req->execute([$this->id=>intval($this->id_val)]);
                 if ($results = $req->fetch(PDO::FETCH_ASSOC)) {
+                    http_response_code(200);
                     return json_encode($results);
                 }else {
+                    http_response_code(404);
                     $results['error'] = true;
                     $results['message'] = "Une erreur s'est produite ou enregistrement non trouvé";
                     return json_encode($results);
@@ -40,6 +42,7 @@
             }else{
                 $req = $this->db->query($query);
                 if ($result = $req->fetchAll(PDO::FETCH_ASSOC)) {
+                    http_response_code(200);
                     return json_encode($result);
                 }
             }                              
@@ -69,15 +72,23 @@
             
 
             $req = $this->db->prepare($sql);
-            if ($req->execute($this->values)) {
-                $result = array("status"=>1,
-                                "message"=> "");
-                $results['error'] = false;
-                $results['message'] = "Enregistrement effectué avec succès";
+            if (!empty($this->values)) {
+                if ($req->execute($this->values)) {
+                    http_response_code(201);
+                    $results['error'] = false;
+                    $results['message'] = "Enregistrement effectué avec succès";
+                } else {
+                    http_response_code(503);
+                    $results['error'] = true;
+                    $results['message'] = "Enregistrement échoué";
+                }
             } else {
+                http_response_code(400);
                 $results['error'] = true;
-                $results['message'] = "Enregistrement échoué";
+                $results['message'] = "Un ou plusieurs champs mal renseigner";
             }
+            
+            
             return json_encode($results);
             
         }
@@ -101,9 +112,11 @@
 
             $req = $this->db->prepare($sql);
             if ($req->execute($this->values)) {
+                http_response_code(200);
                 $results['error'] = false;
                 $results['message'] = "Enregistrement modifié avec succès";
             } else {
+                http_response_code(503);
                 $results['error'] = true;
                 $results['message'] = "modification échouée";
             }
@@ -118,9 +131,11 @@
             $sql = "DELETE FROM $this->table WHERE $this->id=$this->id_val";
 
             if ($this->db->exec($sql)) {
+                http_response_code(200);
                 $results['error'] = false;
                 $results['message'] = "Enregistrement supprimer avec succès";
             } else {
+                http_response_code(503);
                 $results['error'] = true;
                 $results['message'] = "suppression échouée";
             }
