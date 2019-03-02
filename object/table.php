@@ -50,13 +50,12 @@
             break;
         
         case 'POST':
-            //insert('vols',['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'],$data);
             echo $table->insert();
             break;
 
         case 'PUT':
             $id = intval($_GET['id']);
-            update('vols',['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'],$data, 'id', $id);
+            echo $table->update();
             break;
         case 'DELETE':
             $id = intval($_GET['id']);

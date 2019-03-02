@@ -82,7 +82,7 @@
     {
         if (count($this->fields) > 0) {
             $total = count($this->fields) - 1;
-            $sql = "UPDATE $table SET ";
+            $sql = "UPDATE $this->table SET ";
             foreach ($this->fields as $key => $field) {
                 if ($total != $key) {
                     $sql .= "$field=:$field, ";
@@ -92,8 +92,8 @@
             }
             $sql .= "WHERE $this->id=:$this->id";
             
-            $values[$this->id] = $this->id_val;
-
+            $this->values[$this->id] = $this->id_val;
+            
             $req = $this->db->prepare($sql);
             if ($req->execute($this->values)) {
                 $result = array("status"=>1,
