@@ -7,6 +7,7 @@
         private $id;
         private $id_val;
         private $db;
+        private $results = [];
 
         public function __construct($db, $table, $fields = [null], $values = [null], $id=null, $id_val=null) {
             $this->db = $db;
@@ -14,7 +15,9 @@
             $this->fields = $fields;
             $this->values = $values;
             $this->id = $id;
-            $this->id_val = $id_val;            
+            $this->id_val = $id_val;   
+            $this->results['error'] = false;
+            $this->results['message'] = "Tout s'est bien déroulé";         
         }
 
         public function getData()
@@ -27,12 +30,12 @@
                 $req = $this->db->prepare($query);
                 //var_dump([$this->id=>intval($this->id_val)]); die();
                 $req->execute([$this->id=>intval($this->id_val)]);
-                if ($result = $req->fetch(PDO::FETCH_ASSOC)) {
-                    return json_encode($result);
+                if ($results = $req->fetch(PDO::FETCH_ASSOC)) {
+                    return json_encode($results);
                 }else {
-                    $result = array("status"=>0,
-                                    "message"=> "Une erreur s'est produite ou enregistrement non trouvé");
-                    return json_encode($result);
+                    $results['error'] = true;
+                    $results['message'] = "Une erreur s'est produite ou enregistrement non trouvé";
+                    return json_encode($results);
                 }
             }else{
                 $req = $this->db->query($query);
@@ -42,7 +45,7 @@
             }                              
         }
 
-    function insert()
+    public function insert()
     {
         if (count($this->fields) > 0) {
             $total = count($this->fields) - 1;
@@ -68,17 +71,19 @@
             $req = $this->db->prepare($sql);
             if ($req->execute($this->values)) {
                 $result = array("status"=>1,
-                                "message"=> "Enregistrement effectué avec succès");
+                                "message"=> "");
+                $results['error'] = false;
+                $results['message'] = "Enregistrement effectué avec succès";
             } else {
-                $result = array("status"=>0,
-                                "message"=> "Enregistrement échoué");
+                $results['error'] = true;
+                $results['message'] = "Enregistrement échoué";
             }
-            return json_encode($result);
+            return json_encode($results);
             
         }
     }
 
-    function update()
+    public function update()
     {
         if (count($this->fields) > 0) {
             $total = count($this->fields) - 1;
@@ -96,14 +101,14 @@
 
             $req = $this->db->prepare($sql);
             if ($req->execute($this->values)) {
-                $result = array("status"=>1,
-                                "message"=> "Enregistrement modifié avec succès");
+                $results['error'] = false;
+                $results['message'] = "Enregistrement modifié avec succès";
             } else {
-                $result = array("status"=>0,
-                                "message"=> "modification échouée");
+                $results['error'] = true;
+                $results['message'] = "modification échouée";
             }
 
-            return json_encode($result);
+            return json_encode($results);
             
         }
     }
@@ -113,14 +118,14 @@
             $sql = "DELETE FROM $this->table WHERE $this->id=$this->id_val";
 
             if ($this->db->exec($sql)) {
-                $result = array("status"=>1,
-                                "message"=> "Enregistrement supprimer avec succès");
+                $results['error'] = false;
+                $results['message'] = "Enregistrement supprimer avec succès";
             } else {
-                $result = array("status"=>0,
-                                "message"=> "suppression échouée");
+                $results['error'] = true;
+                $results['message'] = "suppression échouée";
             }
 
-            return json_encode($result);
+            return json_encode($results);
         }
         
     }
