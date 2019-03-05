@@ -128,9 +128,9 @@
 
         public function delete()
         {
-            $sql = "DELETE FROM $this->table WHERE $this->id=$this->id_val";
-
-            if ($this->db->exec($sql)) {
+            $sql = "DELETE FROM $this->table WHERE $this->id=?";
+            $del = $this->db->prepare($sql);
+            if ($del->execute([$this->id_val])) {
                 http_response_code(200);
                 $results['error'] = false;
                 $results['message'] = "Enregistrement supprimer avec succès";
