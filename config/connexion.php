@@ -5,17 +5,27 @@
         public $conn;
 
         public function __construct() {
+            //Pour la connexion à la base de donnée
             $this->config['host'] = 'localhost';
             $this->config['db_name'] = 'api_db';
             $this->config['username'] = 'root';
             $this->config['password'] = '';
-            $this->config['tables'] = ['vols', 'products', 'categories'];
+
+            //Infromation des tables de la base de donnée
+            $this->config['tables'] = ['vols', 'products', 'categories','users'];
+
+            //Information des attribut de la base de donnée
             $this->config['tables']['vols'] = ['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'];
             $this->config['tables']['products'] = ['name', 'description', 'price', 'category_id'];
             $this->config['tables']['categories'] = ['name', 'description'];
+            $this->config['tables']['users'] = ['firstname', 'lastname', 'email', 'password'];
+
+            //information des IDs de la base de donnée
             $this->config['tables']['vols']['id'] = ['id'];
             $this->config['tables']['products']['id'] = ['id'];
             $this->config['tables']['categories']['id'] = ['id'];
+            $this->config['tables']['users']['id'] = ['id'];
+
         }
 
         //$mydatabase['name'] = "api_db";

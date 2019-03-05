@@ -69,7 +69,10 @@
                 }
             }
 
-            
+            //s'il existe un champs password il sera crypter
+            if($this->values['password']){
+                $this->values['password'] = password_hash($this->values['password'], PASSWORD_BCRYPT);
+            }
 
             $req = $this->db->prepare($sql);
             if (!empty($this->values)) {

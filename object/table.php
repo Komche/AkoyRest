@@ -1,68 +1,77 @@
 <?php
-    header('Content-Type: application/json');
+    // required headers
+header("Access-Control-Allow-Origin: http://localhost/AkoyRest/");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Max-Age: 3600");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header('Content-Type: application/json');
 
-    include_once('../config/connexion.php');
-    include_once('../model/table.php');
+include_once('../config/connexion.php');
+include_once('../model/table.php');
 
-    $database = new Connexion();
-    $db = $database->getConnection();
-    $config = $database->getConfig();
+$database = new Connexion();
+$db = $database->getConnection();
+$config = $database->getConfig();
 
-    if (!empty($_GET['id'])) {
-        $id_val = $_GET['id'];
-       // die($id);
-    } else {
-        $id_val=null;
-    }
-    
+if (!empty($_GET['id'])) {
+    $id_val = $_GET['id'];
+    // die($id);
+} else {
+    $id_val = null;
+}
 
-    $data = json_decode(file_get_contents('php://input'),true);
-    
-    $table_name = explode("/", $_SERVER['REDIRECT_URL']); 
-    if (in_array($table_name[3], $config['tables'])) {
 
-        $current_table = $table_name[3];
-        $id = $config['tables'][$current_table]['id'][0];
-        $table_field = array();
-        $table_field_ = $config['tables'][$current_table];
-        foreach ($table_field_ as $key => $value) {
-            if (is_int($key)) {
-                $table_field[] = $value;
-            }
+$data = json_decode(file_get_contents('php://input'), true);
+
+$table_name = explode("/", $_SERVER['REDIRECT_URL']);
+if (in_array($table_name[3], $config['tables'])) {
+
+    $current_table = $table_name[3];
+    $id = $config['tables'][$current_table]['id'][0];
+    $table_field = array();
+    $table_field_ = $config['tables'][$current_table];
+    foreach ($table_field_ as $key => $value) {
+        if (is_int($key)) {
+            $table_field[] = $value;
         }
-        $table = new Table($db,$table_name[3],$table_field,$data,$id,$id_val);
-    } else {
-        die("$table_name[3] n'existe pas dans la liste des tables de cette base de donnée ");
     }
-    
-    
-    
+    $table = new Table($db, $table_name[3], $table_field, $data, $id, $id_val);
+} else {
+    die("$table_name[3] n'existe pas dans la liste des tables de cette base de donnée ");
+}
 
-    $request_method = $_SERVER['REQUEST_METHOD'];
 
-    switch ($request_method) {
-        case 'GET':
-            if(!empty($id)){
-                echo $table->getData();
-            }else{
-                echo $table->getData();
-            }
-            break;
-        
-        case 'POST':
-            echo $table->insert();
-            break;
 
-        case 'PUT':
-            $id = intval($_GET['id']);
-            echo $table->update();
-            break;
-        case 'DELETE':
-            $id = intval($_GET['id']);
-            echo $table->delete();
-            break;
-        
-        default:
-            header('HTTP/1.0 405 Method Not Allowed');
-            break;
-    }
+
+$request_method = $_SERVER['REQUEST_METHOD'];
+
+switch ($request_method) {
+    case 'GET':
+        header("Access-Control-Allow-Methods: GET");
+        if (!empty($id)) {
+            echo $table->getData();
+        } else {
+            echo $table->getData();
+        }
+        break;
+
+    case 'POST':
+        header("Access-Control-Allow-Methods: POST");
+        echo $table->insert();
+        break;
+
+    case 'PUT':
+        header("Access-Control-Allow-Methods: PUT");
+        $id = intval($_GET['id']);
+        echo $table->update();
+        break;
+    case 'DELETE':
+        header("Access-Control-Allow-Methods: DELETE");
+        $id = intval($_GET['id']);
+        echo $table->delete();
+        break;
+
+    default:
+        header('HTTP/1.0 405 Method Not Allowed');
+        break;
+}
