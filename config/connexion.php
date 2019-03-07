@@ -15,6 +15,7 @@
             $this->config['tables'] = ['vols', 'products', 'categories','users'];
 
             //Information des attribut de la base de donnée
+	    /* NB: si vous souhaitez crypter un de vos champs, par exemple le champ mot de passe il faut le nomer 'password' */
             $this->config['tables']['vols'] = ['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'];
             $this->config['tables']['products'] = ['name', 'description', 'price', 'category_id'];
             $this->config['tables']['categories'] = ['name', 'description'];
@@ -38,7 +39,8 @@
             $db_name = $this->config['db_name'];
 
             try {
-                $this->conn = new PDO("mysql:host=$host;dbname=$db_name", $this->config['username'], $this->config['password']);
+                $pdo_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
+                $this->conn = new PDO("mysql:host=$host;dbname=$db_name", $this->config['username'], $this->config['password'], $pdo_options);
                 $this->conn->exec("set names utf8");
             } catch (PDOException $exception) {
                 echo "Erreur de connection: $exception->getMessage()";

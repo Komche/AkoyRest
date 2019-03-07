@@ -30,20 +30,17 @@
                 $req = $this->db->prepare($query);
                 //var_dump([$this->id=>intval($this->id_val)]); die();
                 $req->execute([$this->id=>intval($this->id_val)]);
-                if ($results = $req->fetch(PDO::FETCH_ASSOC)) {
+                if ($this->results = $req->fetch(PDO::FETCH_ASSOC)) {
                     http_response_code(200);
-                    return json_encode($results);
+                    return json_encode($this->results);
                 }else {
-                    http_response_code(404);
-                    $results['error'] = true;
-                    $results['message'] = "Une erreur s'est produite ou enregistrement non trouvé";
-                    return json_encode($results);
+                    $this->throwError(404, "Une erreur s'est produite ou enregistrement non trouvé", true);
                 }
             }else{
                 $req = $this->db->query($query);
-                if ($result = $req->fetchAll(PDO::FETCH_ASSOC)) {
+                if ($this->results = $req->fetchAll(PDO::FETCH_ASSOC)) {
                     http_response_code(200);
-                    return json_encode($result);
+                    return json_encode($this->results);
                 }
             }                              
         }
@@ -77,23 +74,14 @@
             $req = $this->db->prepare($sql);
             if (!empty($this->values)) {
                 if ($req->execute($this->values)) {
-                    http_response_code(201);
-                    $results['error'] = false;
-                    $results['message'] = "Enregistrement effectué avec succès";
+                    $this->throwError(201, "Enregistrement effectué avec succès");
                 } else {
-                    http_response_code(503);
-                    $results['error'] = true;
-                    $results['message'] = "Enregistrement échoué";
+                    $this->throwError(503, "Enregistrement échoué", true);
+                    
                 }
             } else {
-                http_response_code(400);
-                $results['error'] = true;
-                $results['message'] = "Un ou plusieurs champs mal renseigner";
-            }
-            
-            
-            return json_encode($results);
-            
+                $this->throwError(400, "Un ou plusieurs champs mal renseigner", true);
+            }            
         }
     }
 
@@ -115,35 +103,75 @@
 
             $req = $this->db->prepare($sql);
             if ($req->execute($this->values)) {
-                http_response_code(200);
-                $results['error'] = false;
-                $results['message'] = "Enregistrement modifié avec succès";
+                $this->throwError(200, "Enregistrement modifié avec succès"); 
             } else {
-                http_response_code(503);
-                $results['error'] = true;
-                $results['message'] = "modification échouée";
-            }
-
-            return json_encode($results);
-            
+                $this->throwError(503, "modification échouée",true); 
+            }            
         }
     }
 
         public function delete()
         {
+            if ($this->is_not_use($this->table,$this->id,$this->id_val )) {
+                $this->throwError(503, "Cet enregistrement n'existe pas",true);
+            }
             $sql = "DELETE FROM $this->table WHERE $this->id=?";
             $del = $this->db->prepare($sql);
             if ($del->execute([$this->id_val])) {
-                http_response_code(200);
-                $results['error'] = false;
-                $results['message'] = "Enregistrement supprimer avec succès";
+                $this->throwError(200, "Enregistrement supprimer avec succès");                
             } else {
-                http_response_code(503);
-                $results['error'] = true;
-                $results['message'] = "suppression échouée";
+                $this->throwError(503, "Suppression échouée",true);                
             }
 
-            return json_encode($results);
         }
+
+        public function is_not_empty($fields = [])
+    {
+        if (count($fields) != 0) {
+            foreach ($fields as $field) {
+                if (empty($_POST[$field]) && trim(isset($_POST[$field]) == "")) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    public function lastID($table, $fields)
+    {
+        $sql = "SELECT $fields FROM $table ORDER BY $fields DESC LIMIT 1;";
+        $req = $this->db->query($sql);
+
+        if ($res = $req->fetch()) {
+            return $res[$fields];
+        }
+    }
+
+    public function is_not_use($table, $field, $value)
+    {
+        $sql = "SELECT * FROM $table WHERE $field=:value";
+
+        $req = $this->db->prepare($sql);
+        $req->execute(array('value' => $value));
+        if ($req->fetch()) {
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
         
+        public function throwError($code=null, $message, $is_error=false)
+        {
+            http_response_code($code);
+            $this->results['error'] = $is_error;
+            $this->results['message'] = $message;
+            echo json_encode($this->results); die();
+        }
+
+        public function test($ha)
+        {
+            echo $ha;
+        }
     }
