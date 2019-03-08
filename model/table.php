@@ -45,8 +45,25 @@
             }                              
         }
 
-    public function insert()
+    public function insert($required=null)
     {
+
+        
+        if ($required!==null) {
+            //print_r($this->values); die();
+            foreach ($this->values as $key => $value) {
+                
+                for ($i=0; $i <count($required) ; $i++) { 
+                    if($required[$i]==$key) {
+                        unset($required[$i]);
+
+                        $required[$key] = $value;
+                    }
+                }
+               
+            }
+            $this->is_not_empty($required);
+        }
         if (count($this->fields) > 0) {
             $total = count($this->fields) - 1;
             $sql = "INSERT INTO $this->table(";
@@ -71,6 +88,12 @@
                 $this->values['password'] = password_hash($this->values['password'], PASSWORD_BCRYPT);
             }
 
+            //s'il existe un champ email il sera verifer s'il est au bon format
+            if($this->values['email']){
+                if(!filter_var($this->values['email'], FILTER_VALIDATE_EMAIL))
+                    $this->throwError(503, "Cette adresse email n'est pas au bon format", true);
+            }
+
             $req = $this->db->prepare($sql);
             if (!empty($this->values)) {
                 if ($req->execute($this->values)) {
@@ -87,17 +110,24 @@
 
     public function update()
     {
-        if (count($this->fields) > 0) {
-            $total = count($this->fields) - 1;
+        
+        if (count($this->values) > 0) {
+            $temp  = array_keys($this->values);
+            $last_key = end($temp); 
             $sql = "UPDATE $this->table SET ";
-            foreach ($this->fields as $key => $field) {
-                if ($total != $key) {
-                    $sql .= "$field=:$field, ";
+            foreach ($this->values as $key => $field) {
+                if ($last_key != $key) {
+                    $sql .= "$key=:$key, ";
                 } else {
-                    $sql .= "$field=:$field ";
+                    $sql .= "$key=:$key ";
                 }
             }
             $sql .= "WHERE $this->id=:$this->id";
+
+             //s'il existe un champs password il sera crypter
+             if($this->values['password']){
+                $this->values['password'] = password_hash($this->values['password'], PASSWORD_BCRYPT);
+            }
             
             $this->values[$this->id] = $this->id_val;
 
@@ -128,8 +158,9 @@
         public function is_not_empty($fields = [])
     {
         if (count($fields) != 0) {
-            foreach ($fields as $field) {
-                if (empty($_POST[$field]) && trim(isset($_POST[$field]) == "")) {
+            foreach ($fields as $key => $field) {
+                if (empty($field) && trim($field) == "") {
+                    $this->throwError(503, "$key est vide"); 
                     return false;
                 }
             }

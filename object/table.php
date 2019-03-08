@@ -57,7 +57,7 @@ $request_method = $_SERVER['REQUEST_METHOD'];
 switch ($request_method) {
     case 'GET':
         header("Access-Control-Allow-Methods: GET");
-        if (!empty($id)) {
+        if (!empty($id_val)) {
             echo $table->getData();
         } else {
             echo $table->getData();
@@ -66,13 +66,17 @@ switch ($request_method) {
 
     case 'POST':
         header("Access-Control-Allow-Methods: POST");
-        echo $table->insert();
+        echo $table->insert($config['tables'][$current_table]['required']);
         break;
 
     case 'PUT':
         header("Access-Control-Allow-Methods: PUT");
-        $id = intval($_GET['id']);
-        echo $table->update();
+        
+        if (!empty($id_val)) {
+            echo $table->update();
+        }else {
+            $table->throwError(503, "Vous avez oublié de donner l'identifiant de la table à modifier", true);
+        }
         break;
     case 'DELETE':
         header("Access-Control-Allow-Methods: DELETE");

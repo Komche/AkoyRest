@@ -15,11 +15,18 @@
             $this->config['tables'] = ['vols', 'products', 'categories','users'];
 
             //Information des attribut de la base de donnée
-	    /* NB: si vous souhaitez crypter un de vos champs, par exemple le champ mot de passe il faut le nomer 'password' */
+        /* NB: 
+            1. si vous souhaitez crypter un de vos champs, par exemple le champ mot de passe il faut 
+            le nomer 'password' 
+            
+            2. Si vous souhaitez verifier si une adresse mail est valid il faut nommer le champs 'email' */
             $this->config['tables']['vols'] = ['ville_depart', 'ville_arriver', 'nb_heure_vols', 'prix'];
             $this->config['tables']['products'] = ['name', 'description', 'price', 'category_id'];
             $this->config['tables']['categories'] = ['name', 'description'];
             $this->config['tables']['users'] = ['firstname', 'lastname', 'email', 'password'];
+
+            //les champs requis d'une table
+            $this->config['tables']['users']['required'] = ['email', 'password'];
 
             //information des IDs de la base de donnée
             $this->config['tables']['vols']['id'] = ['id'];
