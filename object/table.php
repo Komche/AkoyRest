@@ -43,7 +43,7 @@ if (in_array($table_name[$table_key], $config['tables'])) {
             $table_field[] = $value;
         }
     }
-    $table = new Table($db, $table_name[$table_key], $table_field, $data, $id, $id_val);
+    $table = new Table($db, $table_name[$table_key], $table_field, $data, $id, $id_val, $config['jwt'], $config['key']);
 } else {
     $table = new Table($db, $table_name[$table_key], $table_field, $data, $id, $id_val);
     $table->throwError(503, "$table_name[$table_key] n'existe pas dans la liste des tables de cette base de donnée", true);
