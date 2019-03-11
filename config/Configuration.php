@@ -1,5 +1,5 @@
 <?php
-class Connexion
+class Configuration
 {
     private $config = array();
     public $conn;

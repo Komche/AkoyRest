@@ -9,7 +9,7 @@ header('Content-Type: application/json');
 include_once('../config/connexion.php');
 include_once('../model/table.php');
 
-$database = new Connexion();
+$database = new Configuration();
 $db = $database->getConnection();
 $config = $database->getConfig();
 $table_key = 0;
