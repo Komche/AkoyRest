@@ -32,6 +32,8 @@ class Table
         $this->results['message'] = "Tout s'est bien déroulé";
     }
 
+    
+
     public function getData()
     {
         $query = "SELECT * FROM $this->table ";
@@ -109,12 +111,12 @@ class Table
             }
 
             //s'il existe un champs password il sera crypter
-            if ($this->values['password']) {
+            if (array_key_exists('password', $this->values)) {
                 $this->values['password'] = password_hash($this->values['password'], PASSWORD_BCRYPT);
             }
 
             //s'il existe un champ email il sera verifer s'il est au bon format
-            if ($this->values['email']) {
+            if (array_key_exists('email', $this->values)) {
                 if (!filter_var($this->values['email'], FILTER_VALIDATE_EMAIL))
                     $this->throwError(503, "Cette adresse email n'est pas au bon format", true);
             }
@@ -149,7 +151,7 @@ class Table
             $sql .= "WHERE $this->id=:$this->id";
 
             //s'il existe un champs password il sera crypter
-            if ($this->values['password']) {
+            if (array_key_exists('password', $this->values)) {
                 $this->values['password'] = password_hash($this->values['password'], PASSWORD_BCRYPT);
             }
 

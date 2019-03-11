@@ -49,7 +49,11 @@ if (in_array($table_name[$table_key], $config['tables'])) {
     $table->throwError(503, "$table_name[$table_key] n'existe pas dans la liste des tables de cette base de donnée", true);
 }
 
-
+if (array_key_exists('required', $config['tables'][$current_table])) {
+    $required = $config['tables'][$current_table]['required'];
+}else{
+    $required = null;
+}
 
 
 $request_method = $_SERVER['REQUEST_METHOD'];
@@ -66,7 +70,7 @@ switch ($request_method) {
 
     case 'POST':
         header("Access-Control-Allow-Methods: POST");
-        echo $table->insert($config['tables'][$current_table]['required']);
+        echo $table->insert($required);
         break;
 
     case 'PUT':
