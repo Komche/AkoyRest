@@ -6,7 +6,7 @@ header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 header('Content-Type: application/json');
 
-include_once('../config/connexion.php');
+include_once('../config/Configuration.php');
 include_once('../model/table.php');
 
 $database = new Configuration();
@@ -43,6 +43,7 @@ if (in_array($table_name[$table_key], $config['tables'])) {
             $table_field[] = $value;
         }
     }
+    
     $table = new Table($db, $table_name[$table_key], $table_field, $data, $id, $id_val, $config['jwt'], $config['key']);
 } else {
     $table = new Table($db, $table_name[$table_key], $table_field, $data, $id, $id_val);

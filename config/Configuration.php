@@ -36,6 +36,12 @@ class Configuration
         $this->config['tables']['categories'] = ['name', 'description'];
         $this->config['tables']['users'] = ['firstname', 'lastname', 'email', 'password'];
 
+        /*
+        * jointure entre les tables
+        * on va lister les champs à afficher des deux tables joint
+        */
+        $this->config['tables']['products']['categories']= ['name', 'description', 'price', 'name as cat_name' ];
+
         //les champs requis d'une table
         $this->config['tables']['users']['required'] = ['email', 'password'];
 

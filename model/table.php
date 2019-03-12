@@ -1,4 +1,5 @@
 <?php
+
 include_once '../lib/php-jwt/src/BeforeValidException.php';
 include_once '../lib/php-jwt/src/ExpiredException.php';
 include_once '../lib/php-jwt/src/SignatureInvalidException.php';
@@ -44,9 +45,10 @@ class Table
             $req = $this->db->prepare($query);
 
             $req->execute([$this->id => intval($this->id_val)]);
-            if ($this->results = $req->fetch(PDO::FETCH_ASSOC)) {
+            if ($this->results['data'] = $req->fetch(PDO::FETCH_ASSOC)) {
                 if ($this->playload != null) {
-                    $this->playload['data'] = $this->results;
+                    $this->playload['data'] = $this->results['data'];
+
                     $token = JWT::encode($this->playload, $this->key);
                     $this->throwError(200, "Succues : $token");
                 } else {
@@ -59,9 +61,9 @@ class Table
             }
         } else {
             $req = $this->db->query($query);
-            if ($this->results = $req->fetchAll(PDO::FETCH_ASSOC)) {
+            if ($this->results['data'] = $req->fetchAll(PDO::FETCH_ASSOC)) {
                 if ($this->playload !== null) {
-                    $this->playload['data'] = $this->results;
+                    $this->playload['data'] = $this->results['data'];
                     $token = JWT::encode($this->playload, $this->key);
                     $this->throwError(200, "Sucuess : $token");
                 } else {
@@ -219,6 +221,8 @@ class Table
 
     public function throwError($code = null, $message, $is_error = false)
     {
+        if(array_key_exists('data', $this->results))
+            unset($this->results['data']);
         http_response_code($code);
         $this->results['error'] = $is_error;
         $this->results['message'] = $message;
