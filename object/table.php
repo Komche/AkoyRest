@@ -25,16 +25,15 @@ if (!empty($_GET['id'])) {
 $data = json_decode(file_get_contents('php://input'), true);
 $table_name = explode("/", $_SERVER['REDIRECT_URL']);
 
+// déterminer si la postion du nom  de la table dans l'url
 foreach ($table_name as $i => $value) {
     if (in_array($value, $config['tables'])) {
         $table_key = $i;
-        $table_name[$table_key] = $value;
+        $current_table = $value;
     }
 }
 
-if (in_array($table_name[$table_key], $config['tables'])) {
-
-    $current_table = $table_name[$table_key];
+if (in_array($current_table, $config['tables'])) {
     $id = $config['tables'][$current_table]['id'][0];
     $table_field = array();
     $table_field_ = $config['tables'][$current_table];
@@ -44,10 +43,10 @@ if (in_array($table_name[$table_key], $config['tables'])) {
         }
     }
     
-    $table = new Table($db, $table_name[$table_key], $table_field, $data, $id, $id_val, $config['jwt'], $config['key']);
+    $table = new Table($db, $current_table, $table_field, $data, $id, $id_val, $config['jwt'], $config['key']);
 } else {
-    $table = new Table($db, $table_name[$table_key], $table_field, $data, $id, $id_val);
-    $table->throwError(503, "$table_name[$table_key] n'existe pas dans la liste des tables de cette base de donnée", true);
+    $table = new Table($db, $current_table, $table_field, $data, $id, $id_val);
+    $table->throwError(503, "$current_table n'existe pas dans la liste des tables de cette base de donnée", true);
 }
 
 if (array_key_exists('required', $config['tables'][$current_table])) {
