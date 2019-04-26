@@ -8,64 +8,69 @@ header('Content-Type: application/json');
 
 include_once('../config/Configuration.php');
 include_once('../model/table.php');
+include_once('../model/function.php');
+include_once('../model/HttpRequest.php');
 
+// get url request values
+$request = new HttpRequest();
+$request->setBaseUrl($_SERVER[ 'SCRIPT_NAME']);
+$request->createRequest();
+$url_request =   $request->getParameters();
+
+// get configuration values
 $database = new Configuration();
 $db = $database->getConnection();
 $config = $database->getConfig();
 $table_key = 0;
 
-if (!empty($_GET['id'])) {
-    $id_val = $_GET['id'];
-    // die($id);
-} else {
-    $id_val = null;
-}
-
-
+//get input data
 $data = json_decode(file_get_contents('php://input'), true);
-$table_name = explode("/", $_SERVER['REDIRECT_URL']);
 
-// déterminer si la postion du nom  de la table dans l'url
-foreach ($table_name as $i => $value) {
-    if (in_array($value, $config['tables'])) {
-        $table_key = $i;
-        $current_table = $value;
-    }
+// check if table_1 existe in database
+if (in_array($url_request['table_1'], $config['tables'])) {
+    $current_table = $url_request['table_1'];
+}else {
+    die('ha');
+    Table::throwError(null, $url_request['table_1']." n'existe dans la base de donnée", true);
 }
 
-if (in_array($current_table, $config['tables'])) {
-    $id = $config['tables'][$current_table]['id'][0];
-    $table_field = array();
-    $table_field_ = $config['tables'][$current_table];
-    foreach ($table_field_ as $key => $value) {
-        if (is_int($key)) {
-            $table_field[] = $value;
-        }
+// check if property_1 existe in database
+$table_field = getSimpleArray($config['tables'][$current_table]);
+if (!empty(trim($url_request['property_1']))) {
+    if (in_array($url_request['property_1'], $table_field)) {
+        $property = $url_request['property_1'];
+    } else {
+        Table::throwError(null, $url_request['property_1'] . " n'existe dans la table $current_table", true);
     }
-    
-    $table = new Table($db, $current_table, $table_field, $data, $id, $id_val, $config['jwt'], $config['key']);
+}else {
+    $property = null;
+}
+
+// check  val_1 existe 
+$table_field = getSimpleArray($config['tables'][$current_table]);
+if (!empty($url_request[ 'val_1'])) {
+    $val = $url_request['val_1'];
 } else {
-    $table = new Table($db, $current_table, $table_field, $data, $id, $id_val);
-    $table->throwError(503, "$current_table n'existe pas dans la liste des tables de cette base de donnée", true);
+    $val = null;
 }
 
+// create instance of Table
+$table = new Table($db, $current_table, $table_field, $data, $property, $val, $config['jwt'], $config['key']);
+
+// check required field
 if (array_key_exists('required', $config['tables'][$current_table])) {
     $required = $config['tables'][$current_table]['required'];
 }else{
     $required = null;
 }
 
-
+// get method
 $request_method = $_SERVER['REQUEST_METHOD'];
 
 switch ($request_method) {
     case 'GET':
         header("Access-Control-Allow-Methods: GET");
-        if (!empty($id_val)) {
-            echo $table->getData();
-        } else {
-            echo $table->getData();
-        }
+        echo $table->getData();
         break;
 
     case 'POST':
@@ -76,7 +81,7 @@ switch ($request_method) {
     case 'PUT':
         header("Access-Control-Allow-Methods: PUT");
         
-        if (!empty($id_val)) {
+        if (!empty($val)) {
             echo $table->update();
         }else {
             $table->throwError(503, "Vous avez oublié de donner l'identifiant de la table à modifier", true);
@@ -84,7 +89,7 @@ switch ($request_method) {
         break;
     case 'DELETE':
         header("Access-Control-Allow-Methods: DELETE");
-        $id = intval($_GET['id']);
+        $property = $_GET[ 'property'];
         echo $table->delete();
         break;
 

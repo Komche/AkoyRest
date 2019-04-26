@@ -12,69 +12,79 @@ class Table
     private $table;
     private $fields = [];
     private $values = [];
-    private $id;
-    private $id_val;
+    private $property;
+    private $val;
     private $db;
-    private $results = [];
+    private static $results = [];
     private $playload;
     private $key;
 
-    public function __construct($db, $table, $fields = [null], $values = [null], $id = null, $id_val = null, $playload = null, $key = null)
+    public function __construct($db, $table, $fields = [null], $values = [null], $property = null, $val = null, $playload = null, $key = null)
     {
         $this->db = $db;
         $this->table = $table;
         $this->fields = $fields;
         $this->values = $values;
-        $this->id = $id;
-        $this->id_val = $id_val;
+        $this->property = $property;
+        $this->val = $val;
         $this->playload = $playload;
         $this->key = $key;
-        $this->results['error'] = false;
-        $this->results['message'] = "Tout s'est bien déroulé";
+        self::$results['error'] = false;
+        self::$results['message'] = "Tout s'est bien déroulé";
     }
 
-    
 
+    /**
+     * get data format json
+     * 
+     * @return json_encode($result)
+     */
     public function getData()
     {
         $query = "SELECT * FROM $this->table ";
-        if ($this->id != null && $this->id_val != null) {
-            //die($this->id_val);
-            $query .= "WHERE $this->id=:$this->id LIMIT 1";
+        if ($this->property != null && $this->val != null) {
+            //die($this->val);
+            $query .= "WHERE $this->property=:$this->property LIMIT 1";
 
             $req = $this->db->prepare($query);
 
-            $req->execute([$this->id => intval($this->id_val)]);
-            if ($this->results['data'] = $req->fetch(PDO::FETCH_ASSOC)) {
+            $req->execute([$this->property => $this->val]);
+            if (self::$results['data'] = $req->fetch(PDO::FETCH_ASSOC)) {
                 if ($this->playload != null) {
-                    $this->playload['data'] = $this->results['data'];
+                    $this->playload['data'] = self::$results['data'];
 
                     $token = JWT::encode($this->playload, $this->key);
                     $this->throwError(200, "Succues : $token");
                 } else {
                     http_response_code(200);
 
-                    return json_encode($this->results);
+                    return json_encode(self::$results);
                 }
             } else {
                 $this->throwError(404, "Une erreur s'est produite ou enregistrement non trouvé", true);
             }
         } else {
             $req = $this->db->query($query);
-            if ($this->results['data'] = $req->fetchAll(PDO::FETCH_ASSOC)) {
+            if (self::$results['data'] = $req->fetchAll(PDO::FETCH_ASSOC)) {
                 if ($this->playload !== null) {
-                    $this->playload['data'] = $this->results['data'];
+                    $this->playload['data'] = self::$results['data'];
                     $token = JWT::encode($this->playload, $this->key);
                     $this->throwError(200, "Sucuess : $token");
                 } else {
                     http_response_code(200);
 
-                    return json_encode($this->results);
+                    return json_encode(self::$results);
                 }
             }
         }
     }
 
+    /**
+     * insert data
+     * 
+     * @param array|null $required
+     * @return void
+     */
     public function insert($required = null)
     {
 
@@ -136,6 +146,11 @@ class Table
         }
     }
 
+    /**
+     * update data
+     * 
+     * @return void
+     */
     public function update()
     {
 
@@ -150,14 +165,14 @@ class Table
                     $sql .= "$key=:$key ";
                 }
             }
-            $sql .= "WHERE $this->id=:$this->id";
+            $sql .= "WHERE $this->property=:$this->property";
 
             //s'il existe un champs password il sera crypter
             if (array_key_exists('password', $this->values)) {
                 $this->values['password'] = password_hash($this->values['password'], PASSWORD_BCRYPT);
             }
 
-            $this->values[$this->id] = $this->id_val;
+            $this->values[$this->property] = $this->val;
 
             $req = $this->db->prepare($sql);
             if ($req->execute($this->values)) {
@@ -168,20 +183,31 @@ class Table
         }
     }
 
+    /**
+     * delete row data
+     * 
+     * @return void
+     */
     public function delete()
     {
-        if ($this->is_not_use($this->table, $this->id, $this->id_val)) {
+        if ($this->is_not_use($this->table, $this->property, $this->val)) {
             $this->throwError(503, "Cet enregistrement n'existe pas", true);
         }
-        $sql = "DELETE FROM $this->table WHERE $this->id=?";
+        $sql = "DELETE FROM $this->table WHERE $this->property=?";
         $del = $this->db->prepare($sql);
-        if ($del->execute([$this->id_val])) {
+        if ($del->execute([$this->val])) {
             $this->throwError(200, "Enregistrement supprimer avec succès");
         } else {
             $this->throwError(503, "Suppression échouée", true);
         }
     }
 
+    /**
+     * check if fields is empty
+     * 
+     * @param array $fields
+     * @return boolean
+     */
     public function is_not_empty($fields = [])
     {
         if (count($fields) != 0) {
@@ -195,6 +221,13 @@ class Table
         }
     }
 
+    /**
+     * get the last id of table
+     * 
+     * @param mixed $table
+     * @param mixed $field
+     * @return array
+     */
     public function lastID($table, $fields)
     {
         $sql = "SELECT $fields FROM $table ORDER BY $fields DESC LIMIT 1;";
@@ -205,6 +238,14 @@ class Table
         }
     }
 
+    /**
+     * check if row exist in a table
+     * 
+     * @param mixed $table
+     * @param mixed $field
+     * @param mixed $value
+     * @return boolean
+     */
     public function is_not_use($table, $field, $value)
     {
         $sql = "SELECT * FROM $table WHERE $field=:value";
@@ -218,21 +259,23 @@ class Table
         }
     }
 
-
+    /**
+     * error manager
+     * 
+     * @param int|null $code
+     * @param mixed $message
+     * @param boolean|false $is_error
+     * @return json_encode($result)
+     */
     public function throwError($code = null, $message, $is_error = false)
     {
-        if(array_key_exists('data', $this->results))
-            unset($this->results['data']);
+        if(array_key_exists('data', self::$results))
+            unset(self::$results['data']);
         http_response_code($code);
-        $this->results['error'] = $is_error;
-        $this->results['message'] = $message;
-        echo json_encode($this->results);
+        self::$results['error'] = $is_error;
+        self::$results['message'] = $message;
+        echo json_encode(self::$results);
         die();
-    }
-
-    public function test($ha)
-    {
-        echo $ha;
     }
 }
 
