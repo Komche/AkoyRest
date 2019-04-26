@@ -96,13 +96,15 @@ if (isset($_POST)) {
 
 function getTables()
 {
-    $table = 'akoybiz';
+    if (isset($_POST)) {
+        extract($_POST);
+    }
     global $db;
     $sql = "SHOW TABLES";
     $req = $db->prepare($sql);
     $req->execute();
     while ($res = $req->fetch()) {
-        $data[] = $res["Tables_in_$table"];
+        $data[] = $res["Tables_in_$db_name"];
     }
     return $data;
 }
