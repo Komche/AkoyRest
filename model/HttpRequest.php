@@ -114,7 +114,7 @@ class HttpRequest
             if ($value == 'object') {
                 $this->parameters['table_1'] = next($uriParts);
             } elseif ($value == $this->parameters['table_1']) {
-                $this->parameters['property_1'] = next($uriParts);
+                $this->parameters[ 'property_1'] = next($uriParts);
             }
         }
 

@@ -46,12 +46,6 @@ class Configuration
         //les champs requis d'une table
         //$this->config['tables']['users']['required'] = ['email', 'password'];
 
-        //information des IDs de la base de donnée
-        $this->config['tables']['vols']['id'] = ['id'];
-        $this->config['tables']['products']['id'] = ['id'];
-        $this->config['tables']['categories']['id'] = ['id'];
-        $this->config['tables']['users']['id'] = ['id'];
-
         //print_r($this->config['tables']); die();
     }
 

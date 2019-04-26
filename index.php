@@ -35,7 +35,7 @@
 
 
 <?php
- //echo file_get_contents('config/Configuration.php'); die();
+//echo file_get_contents('config/Configuration.php'); die();
 require_once('config/Configuration.php');
 $database = new Configuration();
 global $db;
@@ -64,34 +64,31 @@ if (isset($_POST)) {
             $txt .= '\'' . $tables . '\',';
         }
         $txt .= '];';
-        file_put_contents("config/var.php", "\n" .$txt.PHP_EOL , FILE_APPEND | LOCK_EX, null);
+        file_put_contents("config/var.php", "\n" . $txt . PHP_EOL, FILE_APPEND | LOCK_EX, null);
 
         foreach ($tables_list as $tables) {
             $fields = getFields($tables);
             if (is_array($fields) || is_object($fields)) {
-                (empty($text_field)) ? $text_field = '$this->config[\'tables\'][\''.$tables.'\'] = [' : $text_field .= '$this->config[\'tables\'][\''.$tables.'\'] = [';
-                (empty($text_field_id)) ? $text_field_id = '$this->config[\'tables\'][\''.$tables.'\'][\'id\'] = [' : $text_field_id .= '$this->config[\'tables\'][\''.$tables.'\'][\'id\'] = [';
-                $text_field = '$this->config[\'tables\'][\''.$tables.'\'] = [';
-                foreach ($fields as $key=> $field) {
-                    if ($key==0) {
+                (empty($text_field)) ? $text_field = '$this->config[\'tables\'][\'' . $tables . '\'] = [' : $text_field .= '$this->config[\'tables\'][\'' . $tables . '\'] = [';
+                (empty($text_field_id)) ? $text_field_id = '$this->config[\'tables\'][\'' . $tables . '\'][\'id\'] = [' : $text_field_id .= '$this->config[\'tables\'][\'' . $tables . '\'][\'id\'] = [';
+                $text_field = '$this->config[\'tables\'][\'' . $tables . '\'] = [';
+                foreach ($fields as $key => $field) {
+                    if ($key == 0) {
                         $text_field_id .= '\'' . $field . '\'';
-                    }else {
+                        $text_field .= '\'' . $field . '\',';
+                    } else {
                         $text_field .= '\'' . $field . '\',';
                     }
                 }
                 $text_field .= '];';
                 $text_field_id .= '];';
-                file_put_contents("config/var.php", "\n" .$text_field.PHP_EOL , FILE_APPEND | LOCK_EX, null);
-                file_put_contents("config/var.php", "\n" .$text_field_id.PHP_EOL , FILE_APPEND | LOCK_EX, null);
+                file_put_contents("config/var.php", "\n" . $text_field . PHP_EOL, FILE_APPEND | LOCK_EX, null);
+                file_put_contents("config/var.php", "\n" . $text_field_id . PHP_EOL, FILE_APPEND | LOCK_EX, null);
             }
         }
-
-        
-    }else {
+    } else {
         die("Aucune table trouvé dans votre base de donnée");
     }
-
-    
 }
 
 function getTables()
@@ -119,4 +116,4 @@ function getFields($table)
     }
     return $data;
 }
-?> 
+?>
